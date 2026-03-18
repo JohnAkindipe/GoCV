@@ -1,0 +1,108 @@
+SSH KEY GENERATION
+Command to generate ssh key pair: ssh-keygen -t rsa -b 4096 -C "akindipejohn2017@gmail.com"
+passphrase: akindipe123
+ssh-file: C:\Users\hp/.ssh/id_rsa_greenlight (pub - C:\Users\hp/.ssh/id_rsa_greenlight.pub)
+ssh root@<some ip> to ssh into an ssh server (with specified ip) as root user.
+
+It appears one has to start the ssh-agent for each session and add the private key
+to the agent in order to authenticate with the server at the start of every session.
+-------------------------------------------------------------------------------------------------------------------------
+ADD SSH AGENT TO TERMINAL
+eval $(ssh-agent -s)
+ssh-add ~/.ssh/id_rsa_greenlight
+ssh root@161.35.36.3
+ssh election-software-server.us-central1-a.election-software-a93e5
+-------------------------------------------------------------------------------------------------------------------------
+DIGITAL OCEAN DROPLET
+Droplet Ip: 161.35.36.3
+Configuration:
+- Create a remote setup folder
+1) mkdir remote/setup
+- Create a shell script to automate some tasks
+2) Shell script at remote/setup/01.sh
+This shell script contains useful commands.
+-------------------------------------------------------------------------------------------------------------------------
+USEFUL COMMANDS
+I used the command "scp -r ./remote/setup root@64.227.38.217:/root" to
+copy the contents of the remote/setup folder to the server at the
+root directory. I have confirmed that this copy was successful.
+The server contains the 01.sh script. I will pick up from here
+next time.
+
+- KILL REMOTE HTTP SERVER PERMANENTLY: lsof -ti:4000 | xargs kill -9
+-------------------------------------------------------------------------------------------------------------------------
+LINUX SERVER SETUP
+# Install necessary build materials (make, gcc, g++)
+- sudo apt install build-essential
+
+# Download Go
+cd ~
+wget https://go.dev/dl/go1.25.2.linux-amd64.tar.gz
+
+# Remove any previous Go installation and extract the new one
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf go1.22.0.linux-amd64.tar.gz
+
+# Add Go to PATH
+echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.profile
+echo 'export PATH=$PATH:$HOME/go/bin' >> ~/.profile
+
+# Apply the changes
+source ~/.profile
+
+# Verify installation
+go version
+
+# Clean up the downloaded archive
+rm go1.25.2.linux-amd64.tar.gz
+
+# Install GoCV
+git clone https://github.com/hybridgroup/gocv.git
+cd gocv/
+make install
+-------------------------------------------------------------------------------------------------------------------------
+COPY FILE FROM LOCAL TO REMOTE
+To copy the content of my tcpserver.go to the remote server
+scp ./tcpserver.go root@161.35.36.3:/root/practice/main.go
+-------------------------------------------------------------------------------------------------------------------------
+YZMA AI 
+- Downloaded the qwen2.5-0.5b-instruct-q4_k_m.gguf model to my remote linux server
+it is located at /root/models
+- Was able to run the practice example
+-------------------------------------------------------------------------------------------------------------------------
+ADDITIONAL EFFECTS
+- Sunkissed
+- Oil painting
+- Monalisa effect?
+-------------------------------------------------------------------------------------------------------------------------
+CURRENT ARCHITECTURE
+- The current architecture is that I have to create an http server
+on the remote server in order to be able to work with rtc.
+-------------------------------------------------------------------------------------------------------------------------
+PROBLEMS I OVERCAME
+- Having to setup the server on a remote digital ocean droplet because
+my pc doesn't support linux.
+- Had to learn webrtc
+- solving the problem of symmetric nat
+- realized that real-time streaming between the client and server would be
+impossible due to the compute-intensive nature. Had to resort to 15s interval
+automatic capture instead, using webrtc data channels.
+- used image to ascii convertereva
+- ansi to html
+-------------------------------------------------------------------------------------------------------------------------
+NEXT STEPS
+We're now able to send images over webrtc data channels to the server, we can:
+- add captions to the images using ai and display the caption and image
+- use ai to amplify the effects on the images?
+- use vision models to modify the filters applied?
+- Use opencv.js to do face detection on the frontend?
+- I've now got it working and we can send glitch effects from the frontend
+to the backend, apply effects and then send back to the frontend.
+I faced a nasty bug, I was referencing a piece of memory
+after freeing it.Took me 6 hours to fix this bug.
+- Had to use gocv dnn instead of haar cascades for image detection.
+- make the ascii fit the entire screen.
+
+
+only need to set fixed width and height
+I have made headway with the ASCII art

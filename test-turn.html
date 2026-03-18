@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TURN Server Test</title>
+</head>
+<body>
+    <h1>TURN Server Connectivity Test</h1>
+    <button onclick="testTurn()">Test TURN Servers</button>
+    <pre id="results"></pre>
+
+    <script>
+        async function testTurn() {
+            const results = document.getElementById('results');
+            results.textContent = 'Testing TURN servers...\n\n';
+
+            const servers = [
+                {
+                    urls: ['turn:openrelay.metered.ca:80'],
+                    username: 'openrelayproject',
+                    credential: 'openrelayproject'
+                },
+                {
+                    urls: ['turn:relay.metered.ca:80'],
+                    username: '9e95e1c078e4b8c20fc98f97',
+                    credential: 'iFhwFGiLLtc+Rq7a'
+                }
+            ];
+
+            for (const server of servers) {
+                try {
+                    results.textContent += `Testing ${server.urls[0]}...\n`;
+                    
+                    const pc = new RTCPeerConnection({
+                        iceServers: [server],
+                        iceCandidatePoolSize: 1
+                    });
+
+                    let relayFound = false;
+                    pc.onicecandidate = (e) => {
+                        if (e.candidate && e.candidate.type === 'relay') {
+                            relayFound = true;
+                            results.textContent += `✓ RELAY candidate found: ${e.candidate.candidate}\n\n`;
+                        }
+                    };
+
+                    // Create a data channel to trigger ICE gathering
+                    pc.createDataChannel('test');
+                    const offer = await pc.createOffer();
+                    await pc.setLocalDescription(offer);
+
+                    // Wait for ICE gathering to complete
+                    await new Promise((resolve) => {
+                        pc.onicegatheringstatechange = () => {
+                            if (pc.iceGatheringState === 'complete') {
+                                resolve();
+                            }
+                        };
+                        setTimeout(resolve, 10000); // 10 second timeout
+                    });
+
+                    if (!relayFound) {
+                        results.textContent += `✗ FAILED: No relay candidate found\n\n`;
+                    }
+
+                    pc.close();
+                } catch (err) {
+                    results.textContent += `✗ ERROR: ${err.message}\n\n`;
+                }
+            }
+            
+            results.textContent += 'Test complete!';
+        }
+    </script>
+</body>
+</html>
