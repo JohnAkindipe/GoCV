@@ -1,38 +1,31 @@
 "use client";
 import { useState } from "react";
 import { useCamera } from "./hooks/useCamera";
-import { useWebRTC } from "./hooks/useWebRTC";
+import { useFrameProcessor } from "./hooks/useFrameProcessor";
 import { CameraControls } from "./components/CameraControls";
 import { CameraVideo } from "./components/CameraVideo";
 import { ErrorMessage } from "./components/ErrorMessage";
 import parse from "html-react-parser";
 
 export default function Home() {
-  const [playAudio, setPlayAudio] = useState(false);
   const [serverResponse, setServerResponse] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  const { videoRef, status, error, stream, startCamera, stopCamera } = useCamera({
+  const { videoRef, status, error, startCamera, stopCamera } = useCamera({
     autoStart: true,
-    playAudio,
     facingMode: "user",
   });
 
-  const { isConnected, processedImage, asciiText, expectingASCII, startStreaming, stopStreaming, toggleASCIIMode } = useWebRTC();
+  const { isProcessing, processedImage, asciiText, expectingASCII, startProcessing, stopProcessing, toggleASCIIMode } = useFrameProcessor();
 
-  const handleStartStreaming = async () => {
-    if (!stream || !videoRef.current) {
-      setFetchError("No camera stream available");
+  const handleStartProcessing = () => {
+    if (!videoRef.current) {
+      setFetchError("No camera video element available");
       return;
     }
-    try {
-      setFetchError(null);
-      await startStreaming(stream, videoRef.current);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      setFetchError(message);
-    }
+    setFetchError(null);
+    startProcessing(videoRef.current);
   };
 
   const testServerEndpoint = async () => {
@@ -41,7 +34,7 @@ export default function Home() {
     setServerResponse("");
 
     try {
-      const response = await fetch("http://161.35.36.3:4000/test");
+      const response = await fetch("http://localhost:4000/test");
       
       if (!response.ok) {
         throw new Error(`Server responded with status: ${response.status}`);
@@ -63,10 +56,8 @@ export default function Home() {
 
       <CameraControls
         status={status}
-        playAudio={playAudio}
         onStart={startCamera}
         onStop={stopCamera}
-        onToggleAudio={setPlayAudio}
       />
 
       <ErrorMessage message={error} />
@@ -108,7 +99,7 @@ export default function Home() {
               borderRadius: 8,
               color: "#666"
             }}>
-              {isConnected ? "Processing next frame..." : "Start streaming to see effect"}
+              {isProcessing ? "Processing next frame..." : "Start streaming to see effect"}
             </div>
           )}
         </div>
@@ -116,18 +107,18 @@ export default function Home() {
       <div style={{ display: "grid", gap: 12 }}>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <button
-            onClick={handleStartStreaming}
-            disabled={!stream || isConnected}
+            onClick={handleStartProcessing}
+            disabled={status !== "running" || isProcessing}
             style={{ padding: "10px 16px", fontSize: 14 }}
           >
-            {isConnected ? "Streaming..." : "Start Glitch Stream (15s intervals)"}
+            {isProcessing ? "Processing..." : "Start Processing (20s intervals)"}
           </button>
           <button
-            onClick={stopStreaming}
-            disabled={!isConnected}
+            onClick={stopProcessing}
+            disabled={!isProcessing}
             style={{ padding: "10px 16px", fontSize: 14 }}
           >
-            Stop Stream
+            Stop Processing
           </button>
           <button
             onClick={toggleASCIIMode}
@@ -142,9 +133,9 @@ export default function Home() {
           >
             {expectingASCII ? "ASCII Mode: ON" : "ASCII Mode: OFF"}
           </button>
-          {isConnected && (
+          {isProcessing && (
             <span style={{ color: "green", fontSize: 14 }}>
-              ✓ Connected - Processing every 15s
+              ✓ Processing every 20s
             </span>
           )}
         </div>

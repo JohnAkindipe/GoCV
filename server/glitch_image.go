@@ -13,7 +13,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func glitchImage2(inputImage []byte) ([]byte, error) {
+func glitchImage(inputImage []byte) ([]byte, error) {
 	fmt.Println("Applying glitch effect")
 	// 1. Decode
 	mat, err := gocv.IMDecode(inputImage, gocv.IMReadColor)

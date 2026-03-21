@@ -106,3 +106,6 @@ after freeing it.Took me 6 hours to fix this bug.
 
 only need to set fixed width and height
 I have made headway with the ASCII art
+---------------------------------------------------------------------------------------
+TODO - Download dnn somn somn on this machine
+Figure out how it works.

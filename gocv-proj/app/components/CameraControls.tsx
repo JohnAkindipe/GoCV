@@ -2,18 +2,14 @@ import type { CameraStatus } from "../hooks/useCamera";
 
 export interface CameraControlsProps {
   status: CameraStatus;
-  playAudio: boolean;
   onStart: () => void;
   onStop: () => void;
-  onToggleAudio: (checked: boolean) => void;
 }
 
 export function CameraControls({
   status,
-  playAudio,
   onStart,
   onStop,
-  onToggleAudio,
 }: CameraControlsProps) {
   return (
     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -31,15 +27,6 @@ export function CameraControls({
       >
         Stop
       </button>
-
-      <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <input
-          type="checkbox"
-          checked={playAudio}
-          onChange={(e) => onToggleAudio(e.target.checked)}
-        />
-        Play audio
-      </label>
 
       <span style={{ opacity: 0.8 }}>
         Status: <strong>{status}</strong>

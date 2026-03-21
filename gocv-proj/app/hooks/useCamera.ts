@@ -4,7 +4,6 @@ export type CameraStatus = "idle" | "starting" | "running" | "error";
 
 export interface UseCameraOptions {
   autoStart?: boolean;
-  playAudio?: boolean;
   facingMode?: "user" | "environment";
 }
 
@@ -12,13 +11,12 @@ export interface UseCameraReturn {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   status: CameraStatus;
   error: string | null;
-  stream: MediaStream | null;
   startCamera: () => Promise<void>;
   stopCamera: () => void;
 }
 
 export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
-  const { autoStart = true, playAudio = false, facingMode = "user" } = options;
+  const { autoStart = true, facingMode = "user" } = options;
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -56,11 +54,7 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode },
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
+        audio: false,
       });
 
       streamRef.current = stream;
@@ -70,9 +64,7 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
       }
 
       video.srcObject = stream;
-
-      // Keep muted by default so autoplay works and to avoid feedback.
-      video.muted = !playAudio;
+      video.muted = true;
       await video.play();
       setStatus("running");
     } catch (err) {
@@ -81,17 +73,7 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
       setError(message);
       setStatus("error");
     }
-  }, [playAudio, facingMode, stopCamera]);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    video.muted = !playAudio;
-    // If the browser blocks unmuting without a gesture, the toggle still flips,
-    // but audio may not start until the user presses Start.
-    void video.play().catch(() => {});
-  }, [playAudio]);
+  }, [facingMode, stopCamera]);
 
   useEffect(() => {
     if (autoStart) {
@@ -104,7 +86,6 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
     videoRef,
     status,
     error,
-    stream: streamRef.current,
     startCamera,
     stopCamera,
   };
