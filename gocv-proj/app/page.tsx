@@ -1,175 +1,38 @@
 "use client";
-import { useState } from "react";
-import { useCamera } from "./hooks/useCamera";
-import { useFrameProcessor } from "./hooks/useFrameProcessor";
-import { CameraControls } from "./components/CameraControls";
-import { CameraVideo } from "./components/CameraVideo";
-import { ErrorMessage } from "./components/ErrorMessage";
-import parse from "html-react-parser";
+import { useRef } from "react";
+import { useScroll, useTransform, motion } from "framer-motion";
 
 export default function Home() {
-  const [serverResponse, setServerResponse] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const { videoRef, status, error, startCamera, stopCamera } = useCamera({
-    autoStart: true,
-    facingMode: "user",
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
   });
 
-  const { isProcessing, processedImage, asciiText, expectingASCII, startProcessing, stopProcessing, toggleASCIIMode } = useFrameProcessor();
-
-  const handleStartProcessing = () => {
-    if (!videoRef.current) {
-      setFetchError("No camera video element available");
-      return;
-    }
-    setFetchError(null);
-    startProcessing(videoRef.current);
-  };
-
-  const testServerEndpoint = async () => {
-    setIsLoading(true);
-    setFetchError(null);
-    setServerResponse("");
-
-    try {
-      const response = await fetch("http://localhost:4000/test");
-      
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
-      }
-
-      const text = await response.text();
-      setServerResponse(text);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      setFetchError(message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // As scroll goes 0→1, shift the strip left by 2 full screen widths (3 cards)
+  const x = useTransform(scrollYProgress, [0, 1], ["0vw", "-200vw"]);
 
   return (
-    <main style={{ padding: 24, display: "grid", gap: 16 }}>
-      <h1 style={{ fontSize: 20, fontWeight: 600 }}>Live Camera Feed with Glitch Effect</h1>
-
-      <CameraControls
-        status={status}
-        onStart={startCamera}
-        onStop={stopCamera}
-      />
-
-      <ErrorMessage message={error} />
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        <div>
-          <h3 style={{ margin: "0 0 8px 0" }}>Live Camera</h3>
-          <CameraVideo videoRef={videoRef} />
-        </div>
-        
-        <div>
-          <h3 style={{ margin: "0 0 8px 0" }}>
-            {expectingASCII ? "ASCII Art Output" : "Glitched Output"}
-          </h3>
-          {asciiText ? (
-            <div className="term-container">
-              {parse(asciiText)}
+    <div ref={containerRef} className="relative h-[300vh] bg-[#f0e9d8]">
+      <div className="sticky top-0 h-screen overflow-hidden">
+        <motion.div style={{ x }} className="flex h-full">
+          {[1, 2, 3].map((n) => (
+            <div
+              key={n}
+              className="w-screen h-full flex-shrink-0 flex items-center justify-center"
+            >
+              <div className="w-80 h-64 bg-white rounded-2xl flex items-center justify-center text-8xl font-bold text-[#f5824a]"
+                style={{ boxShadow: "6px 6px 0px #f5824a" }}
+              >
+                {n}
+              </div>
             </div>
-          ) : processedImage ? (
-            <img 
-              src={processedImage} 
-              alt="Processed" 
-              style={{ 
-                width: "100%", 
-                maxWidth: 640, 
-                border: "2px solid #4CAF50",
-                borderRadius: 8 
-              }} 
-            />
-          ) : (
-            <div style={{ 
-              width: "100%", 
-              maxWidth: 640, 
-              aspectRatio: "4/3",
-              background: "#f0f0f0", 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center",
-              borderRadius: 8,
-              color: "#666"
-            }}>
-              {isProcessing ? "Processing next frame..." : "Start streaming to see effect"}
-            </div>
-          )}
-        </div>
+          ))}
+        </motion.div>
       </div>
-      <div style={{ display: "grid", gap: 12 }}>
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-          <button
-            onClick={handleStartProcessing}
-            disabled={status !== "running" || isProcessing}
-            style={{ padding: "10px 16px", fontSize: 14 }}
-          >
-            {isProcessing ? "Processing..." : "Start Processing (20s intervals)"}
-          </button>
-          <button
-            onClick={stopProcessing}
-            disabled={!isProcessing}
-            style={{ padding: "10px 16px", fontSize: 14 }}
-          >
-            Stop Processing
-          </button>
-          <button
-            onClick={toggleASCIIMode}
-            style={{ 
-              padding: "10px 16px", 
-              fontSize: 14,
-              background: expectingASCII ? "#4CAF50" : "#f0f0f0",
-              color: expectingASCII ? "#fff" : "#333",
-              border: "1px solid #ccc",
-              borderRadius: 4
-            }}
-          >
-            {expectingASCII ? "ASCII Mode: ON" : "ASCII Mode: OFF"}
-          </button>
-          {isProcessing && (
-            <span style={{ color: "green", fontSize: 14 }}>
-              ✓ Processing every 20s
-            </span>
-          )}
-        </div>
-
-        <button
-          onClick={testServerEndpoint}
-          disabled={isLoading}
-          style={{ padding: "10px 16px", fontSize: 14 }}
-        >
-          {isLoading ? "Fetching..." : "Test Server Endpoint"}
-        </button>
-
-        {fetchError && (
-          <p style={{ color: "crimson", margin: 0 }}>
-            Error: {fetchError}
-          </p>
-        )}
-
-        {serverResponse && (
-          <div
-            style={{
-              padding: 16,
-              background: "#f0f0f0",
-              borderRadius: 8,
-              color: "#333",
-            }}
-          >
-            <strong>Server Response:</strong>
-            <p style={{ margin: "8px 0 0", fontFamily: "monospace" }}>
-              {serverResponse}
-            </p>
-          </div>
-        )}
-      </div>
-    </main>
+    </div>
   );
 }
+
+

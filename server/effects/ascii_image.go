@@ -1,4 +1,4 @@
-package main
+package effects
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 )
 
 //convert an image to ascii characters
-func imageToASCII(inputImage []byte) ([]byte, error) {
+func ImageToASCII(inputImage []byte) ([]byte, error) {
     // 1. Preprocess with gocv: enhance contrast for better ASCII output
     // preprocessed, err := preprocessForASCII(inputImage)
     // if err != nil {
@@ -28,7 +28,7 @@ func imageToASCII(inputImage []byte) ([]byte, error) {
     //convert image.Image to ASCII using image2ascii library
     image2ASCIIConverter := convert.NewImageConverter()
     convertOptions := convert.DefaultOptions
-    convertOptions.Colored = false
+    convertOptions.Colored = true
     //width/height = 2.7
     convertOptions.FixedWidth = 40
     convertOptions.FixedHeight = 15

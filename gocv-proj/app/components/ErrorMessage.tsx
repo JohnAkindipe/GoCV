@@ -5,5 +5,5 @@ export interface ErrorMessageProps {
 export function ErrorMessage({ message }: ErrorMessageProps) {
   if (!message) return null;
 
-  return <p style={{ color: "crimson" }}>Camera error: {message}</p>;
+  return <p className="text-red-600">Camera error: {message}</p>;
 }

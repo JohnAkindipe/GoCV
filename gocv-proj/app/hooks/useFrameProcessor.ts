@@ -1,12 +1,20 @@
 import { useRef, useState, useCallback } from 'react';
 
+export type ProcessingMode = 'glitch' | 'blur' | 'sketch' | 'emboss' | 'wave-ripple' | 'pixelate';
+
 export function useFrameProcessor() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedImage, setProcessedImage] = useState<string | null>(null);
-  const [asciiText, setAsciiText] = useState<string | null>(null);
-  const [expectingASCII, setExpectingASCII] = useState(false);
+  const [mode, setMode] = useState<ProcessingMode>('glitch');
+  const [snapshotLabel, setSnapshotLabel] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const expectingASCIIRef = useRef(false);
+  const modeRef = useRef<ProcessingMode>('glitch');
+  const countRef = useRef<number>(20);
+
+  const updateMode = useCallback((newMode: ProcessingMode) => {
+    modeRef.current = newMode;
+    setMode(newMode);
+  }, []);
 
   const captureAndSend = useCallback(async (videoElement: HTMLVideoElement) => {
     const canvas = document.createElement('canvas');
@@ -26,11 +34,11 @@ export function useFrameProcessor() {
       return;
     }
 
-    const mode = expectingASCIIRef.current ? 'ascii' : 'glitch';
-    console.log(`Sending frame: ${blob.size} bytes, mode: ${mode}`);
+    const currentMode = modeRef.current;
+    console.log(`Sending frame: ${blob.size} bytes, endpoint: /${currentMode}`);
 
     try {
-      const response = await fetch(`http://localhost:4000/process-frame?mode=${mode}`, {
+      const response = await fetch(`http://localhost:4000/${currentMode}`, {
         method: 'POST',
         headers: { 'Content-Type': 'image/jpeg' },
         body: blob,
@@ -42,18 +50,9 @@ export function useFrameProcessor() {
         return;
       }
 
-      const contentType = response.headers.get('Content-Type') || '';
-
-      if (contentType.includes('text/html')) {
-        const text = await response.text();
-        setAsciiText(text);
-        setProcessedImage(null);
-      } else {
-        const responseBlob = await response.blob();
-        const imageUrl = URL.createObjectURL(responseBlob);
-        setProcessedImage(imageUrl);
-        setAsciiText(null);
-      }
+      const responseBlob = await response.blob();
+      const imageUrl = URL.createObjectURL(responseBlob);
+      setProcessedImage(imageUrl);
     } catch (err) {
       console.error('Failed to send frame:', err);
     }
@@ -61,14 +60,24 @@ export function useFrameProcessor() {
 
   const startProcessing = useCallback((videoElement: HTMLVideoElement) => {
     setIsProcessing(true);
+    setSnapshotLabel('Taking snapshot...');
+    captureAndSend(videoElement).then(() => {
+      countRef.current = 20;
+      setSnapshotLabel('Next snapshot in 20s');
+    });
 
-    // Send first frame immediately
-    captureAndSend(videoElement);
-
-    // Then every 20 seconds
     intervalRef.current = setInterval(() => {
-      captureAndSend(videoElement);
-    }, 20000);
+      countRef.current -= 1;
+      if (countRef.current <= 0) {
+        setSnapshotLabel('Taking snapshot...');
+        captureAndSend(videoElement).then(() => {
+          countRef.current = 20;
+          setSnapshotLabel('Next snapshot in 20s');
+        });
+      } else {
+        setSnapshotLabel(`Next snapshot in ${countRef.current}s`);
+      }
+    }, 1000);
   }, [captureAndSend]);
 
   const stopProcessing = useCallback(() => {
@@ -78,16 +87,8 @@ export function useFrameProcessor() {
     }
     setIsProcessing(false);
     setProcessedImage(null);
-    setAsciiText(null);
+    setSnapshotLabel(null);
   }, []);
 
-  const toggleASCIIMode = useCallback(() => {
-    setExpectingASCII((prev) => {
-      const newValue = !prev;
-      expectingASCIIRef.current = newValue;
-      return newValue;
-    });
-  }, []);
-
-  return { isProcessing, processedImage, asciiText, expectingASCII, startProcessing, stopProcessing, toggleASCIIMode };
+  return { isProcessing, processedImage, mode, setMode: updateMode, startProcessing, stopProcessing, snapshotLabel };
 }

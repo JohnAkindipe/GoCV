@@ -3,7 +3,6 @@ module gocv_project
 go 1.25.2
 
 require (
-	github.com/buildkite/terminal-to-html/v3 v3.16.8
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/qeesung/image2ascii v1.0.1
 	gocv.io/x/gocv v0.43.0

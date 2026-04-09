@@ -1,5 +1,43 @@
 @import "tailwindcss";
 
+.heading-fade {
+  color: #4B2E2B;
+  font-family: var(--font-rubik-wet-paint), cursive;
+  animation: fade-pulse 3s ease-in-out infinite;
+}
+
+.ornament-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.ornament-divider::before,
+.ornament-divider::after {
+  content: "";
+  display: block;
+  height: 2px;
+  width: 28%;
+  background: #8E977D;
+  box-shadow: 0 3px 0 #8E977D;
+  position: relative;
+  top: -1px;
+}
+
+.ornament-divider span {
+  color: #8E977D;
+  font-size: 1.1rem;
+  user-select: none;
+  line-height: 1;
+}
+
+@keyframes fade-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.25; }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -50,6 +88,54 @@ body {
     visibility: hidden;
   }
 }
+
+.camera-btn {
+  color: black;
+  background-color: transparent;
+  border: 2px solid black;
+  border-radius: 40px;
+  transition: background-color 0.5s ease, color 0.3s ease;
+}
+
+.camera-btn:hover {
+  background-color: black;
+  color: white;
+  border-radius: 40px;
+}
+
+.processing-btn {
+  color: white;
+  background-color: black;
+  border-radius: 40px;
+  transition: opacity 0.3s ease;
+}
+
+.processing-btn:hover {
+  opacity: 0.7;
+  color: white;
+}
+
+.processing-btn:disabled{
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: darkgrey;
+}
+
+.effect-select {
+  background-color: white;
+  color: black;
+  border: 2px solid black;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  box-shadow: 4px 4px 0px #f5824a;
+}
+
+.effect-select:focus {
+  box-shadow: 4px 4px 0px #f5824a;
+}
+
 
 .term-fg1 { } /* don't bold beccause it looks weird */
 .term-fg2 { color: #838887; } /* faint (decreased intensity) - same as gray really */

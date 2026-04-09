@@ -12,25 +12,23 @@ export function CameraControls({
   onStop,
 }: CameraControlsProps) {
   return (
-    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+    <div className="flex gap-3 items-center">
       <button
         onClick={onStart}
         disabled={status === "starting" || status === "running"}
-        style={{ padding: "8px 12px" }}
+        className="px-3 py-2"
       >
         Start
       </button>
       <button
         onClick={onStop}
         disabled={status === "idle" || status === "starting"}
-        style={{ padding: "8px 12px" }}
+        className="px-3 py-2"
       >
         Stop
       </button>
 
-      <span style={{ opacity: 0.8 }}>
-        Status: <strong>{status}</strong>
-      </span>
+
     </div>
   );
 }

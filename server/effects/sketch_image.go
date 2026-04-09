@@ -1,4 +1,4 @@
-package main
+package effects
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 )
 
 // pencil sketch effect function
-func pencilSketchImage(inputImage []byte) ([]byte, error) {
+func PencilSketchImage(inputImage []byte) ([]byte, error) {
 	// 1. Decode Image
 	img, err := gocv.IMDecode(inputImage, gocv.IMReadColor)
 	if img.Empty() || err != nil {

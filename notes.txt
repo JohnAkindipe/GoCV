@@ -109,3 +109,18 @@ I have made headway with the ASCII art
 ---------------------------------------------------------------------------------------
 TODO - Download dnn somn somn on this machine
 Figure out how it works.
+---------------------------------------------------------------------------------------
+FEATURES TO TRY
+oil painting, 
+we can make these better later: pencil sketch, glitch
+Begin styling next
+
+-- Come back to work on the output being cut off slightly on the bottom.
+-- Align items on homepage to common left. Check if we are using border-box.
+---------------------------------------------------------------------------------------
+NEXT STEPS
+-- Work on deepdive section
+-- Work on the timer, perhaps make it better with animations e.g. it appears to skip.
+-- make "click to select effect" bolder.
+-- Work on home page
+-- Keep navbar fixed while scrolling

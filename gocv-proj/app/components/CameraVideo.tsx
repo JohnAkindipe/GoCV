@@ -1,22 +1,14 @@
-import type { CSSProperties } from "react";
-
 export interface CameraVideoProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
-  style?: CSSProperties;
+  className?: string;
 }
 
-export function CameraVideo({ videoRef, style }: CameraVideoProps) {
+export function CameraVideo({ videoRef, className }: CameraVideoProps) {
   return (
     <video
       ref={videoRef}
       playsInline
-      style={{
-        width: "min(900px, 100%)",
-        aspectRatio: "16 / 9",
-        background: "#111",
-        borderRadius: 12,
-        ...style,
-      }}
+      className={`w-full max-w-[900px] aspect-video bg-[#111] rounded-xl ${className ?? ""}`}
     />
   );
 }
