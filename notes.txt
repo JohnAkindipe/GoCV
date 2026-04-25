@@ -106,3 +106,6 @@ after freeing it.Took me 6 hours to fix this bug.
 
 only need to set fixed width and height
 I have made headway with the ASCII art
+-------------------------------------------------------------------------------------------------------------------------
+SSH TUNNELING AND PORT FORWARDING
+ssh -i ~/.ssh/google_compute_engine akindipejohn2017_gmail_com@136.116.33.104 -N -f -L 3000:localhost:3000

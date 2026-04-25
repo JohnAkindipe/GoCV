@@ -8,6 +8,7 @@
 *.out
 server/server
 server/main
+notes.txt
 
 # Go workspace
 vendor/
